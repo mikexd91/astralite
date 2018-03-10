@@ -26,6 +26,9 @@ class HomeVC: UICollectionViewController {
         collectionView?.backgroundColor = .white
         self.navigationItem.title = PFUser.current()?.username?.uppercased()
         
+        // always vertical scroll
+        self.collectionView?.alwaysBounceVertical = true
+        
         // pull to refresh
         refresher = UIRefreshControl()
         refresher.addTarget(self, action: #selector(HomeVC.refresh), for: UIControlEvents.valueChanged)
@@ -79,7 +82,7 @@ class HomeVC: UICollectionViewController {
     }
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return picArray.count
+        return picArray.count * 20
     }
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -87,7 +90,7 @@ class HomeVC: UICollectionViewController {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath) as! PictureCell
         // get picture from array
         // indexPath.row
-        picArray[indexPath.row].getDataInBackground { (data, error) in
+        picArray[0].getDataInBackground { (data, error) in
             if error == nil{
                 cell.picImg.image = UIImage(data: data!)
             }else{
@@ -110,6 +113,7 @@ class HomeVC: UICollectionViewController {
         let avaQuery = PFUser.current()?.object(forKey: "ava") as? PFFile
         avaQuery?.getDataInBackground(block: { (data, error) in
             header.avaImg.image = UIImage(data: data!)
+            header.avaImg.layer.cornerRadius = header.avaImg.frame.size.width/2
             header.avaImg.clipsToBounds = true
         })
         
@@ -141,8 +145,57 @@ class HomeVC: UICollectionViewController {
             }
         }
         
+        // Step 3: implement tap gesture
+        // tap posts
+        let postsTap = UITapGestureRecognizer(target: self, action: #selector(HomeVC.postsTap))
+        postsTap.numberOfTapsRequired = 1
+        header.posts.isUserInteractionEnabled = true
+        header.posts.addGestureRecognizer(postsTap)
+        
+        let followersTap = UITapGestureRecognizer(target: self, action: #selector(HomeVC.followersTap))
+        followersTap.numberOfTapsRequired = 1
+        header.followers.isUserInteractionEnabled = true
+        header.followers.addGestureRecognizer(followersTap)
+        
+        let followingsTap = UITapGestureRecognizer(target: self, action: #selector(HomeVC.followingTap))
+        followingsTap.numberOfTapsRequired = 1
+        header.followings.isUserInteractionEnabled = true
+        header.followings.addGestureRecognizer(followingsTap)
         
         return header
     }
+    
+    // tapped posts label
+    @objc func postsTap(){
+        if !picArray.isEmpty{
+            let index = IndexPath(row: 0, section: 0)
+            self.collectionView?.scrollToItem(at: index, at: UICollectionViewScrollPosition.top, animated: true)
+        }
+    }
+    
+    // tapped followers label
+    @objc func followersTap(){
+        user = (PFUser.current()?.username!)!
+        category = "follower"
+        
+        // make reference to followersTableVC
+        let followers = self.storyboard?.instantiateViewController(withIdentifier: "FollowersTableVC") as! FollowersTableVC
+        // present
+        self.navigationController?.pushViewController(followers, animated: true)
+    }
+    
+    // tapped following label
+    @objc func followingTap(){
+        user = (PFUser.current()?.username!)!
+        category = "following"
+        
+        // make reference to followersTableVC
+        let followers = self.storyboard?.instantiateViewController(withIdentifier: "FollowersTableVC") as! FollowersTableVC
+        // present
+        self.navigationController?.pushViewController(followers, animated: true)
+    }
+    
+    
+    
     
 }

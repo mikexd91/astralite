@@ -23,12 +23,9 @@ class SignUpVC: UIViewController, UIImagePickerControllerDelegate, UINavigationC
     @IBOutlet weak var signUpBtn: UIButton!
     @IBOutlet weak var cancelBtn: UIButton!
     
-    // reset default size
-    var scrollViewHeight: CGFloat = 0
-   
     // keyboard frame size
     var keyboard = CGRect()
-    
+    var isKeyboardUp = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -136,15 +133,19 @@ class SignUpVC: UIViewController, UIImagePickerControllerDelegate, UINavigationC
     
     @objc func showKeyboard(_ notification: NSNotification) {
         self.view.frame.origin.y -= 50
+        isKeyboardUp = true
     }
     
     @objc func hideKeyboard(_ notification: NSNotification) {
         self.view.frame.origin.y += 50
+        isKeyboardUp = false
     }
     
     @objc func dismissKeyboard(_ recognizer : UITapGestureRecognizer) {
         self.view.endEditing(true)
-        self.view.frame.origin.y += 50
+        if(isKeyboardUp){
+            self.view.frame.origin.y += 50
+        }
     }
     
     /*

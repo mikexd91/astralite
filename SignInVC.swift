@@ -25,8 +25,8 @@ class SignInVC: UIViewController {
     
     // keyboard frame size
     var keyboard = CGRect()
-    // reset default size
-    var scrollViewHeight: CGFloat = 0
+    var isKeyboardUp = false;
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -83,15 +83,19 @@ class SignInVC: UIViewController {
     
     @objc func showKeyboard(_ notification: NSNotification) {
         self.view.frame.origin.y -= 50
+        isKeyboardUp = true
     }
     
     @objc func hideKeyboard(_ notification: NSNotification) {
         self.view.frame.origin.y += 50
+        isKeyboardUp = false
     }
     
     @objc func dismissKeyboard(_ recognizer : UITapGestureRecognizer) {
         self.view.endEditing(true)
-        self.view.frame.origin.y += 50
+        if(isKeyboardUp){
+            self.view.frame.origin.y += 50
+        }
     }
     
     /*
